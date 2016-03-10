@@ -1,0 +1,32 @@
+{
+  "name": "big-bid-board-application",
+  "version": "1.0.0",
+  "description": "Simple server, serving a REST interface for bid items",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "express": "^4.13.3",
+    "node-uuid": "^1.4.7",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pliegl/we16-bid-board.git"
+  },
+  "keywords": [
+    "Business Informatics Group",
+    "Web Engineering",
+    "BIG bid application"
+  ],
+  "author": "Philipp Liegl",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pliegl/we16-bid-board/issues"
+  },
+  "homepage": "https://github.com/pliegl/we16-bid-board#readme"
+}
