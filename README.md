@@ -1,7 +1,6 @@
 #BIG Bid Board Application (B3A)
 
-B3A is used to store the results of auctions, which are conducted as part of the
-Web Engineering assignment of the [Business Informatics Group](http://www.big.tuwien.ac.at).
+B3A is used to store the results of auctions, which are conducted in the BIG bid application. The BIG bid application is a lab assignment of the Web Engineering lecture services of the [Business Informatics Group](http://www.big.tuwien.ac.at).
 
 The application consists of a node.js server backend exposing a REST interface, which students may use to push auction results to the server.
 
