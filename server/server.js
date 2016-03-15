@@ -101,13 +101,14 @@ ROUTER.route('/bids')
       console.log('(Re)setting its id to ' + newItem.id);
 
       //Callback, invoked after file operation is complete
-      let returnBids = function (err, data) {
+      //We return the newly inserted item
+      let returnBids = function (err, insertedItem) {
         //Read failed
         if (err) {
           error(res, 'Unable to access data store on server.');
         } else {
           res.setHeader('Cache-Control', 'no-cache');
-          res.json(data);
+          res.json(insertedItem);
         }
       };
 
@@ -133,13 +134,13 @@ ROUTER.route('/bids')
       }
 
       //Callback, invoked after file operation is complete
-      let returnBids = function (err, data) {
+      let returnBids = function (err, updatedItem) {
         //Read failed
         if (err) {
           error(res, 'Unable to access data store on server.');
         } else {
           res.setHeader('Cache-Control', 'no-cache');
-          res.json(data);
+          res.json(updatedItem);
         }
       };
 

@@ -55,7 +55,7 @@ class Datastore {
           console.error('Unable to write items to file ' + err);
         }
 
-        callback(err, bidItems);
+        callback(err, newItem);
       });
     });
   }
@@ -115,7 +115,7 @@ class Datastore {
           console.error('Unable to write items to file ' + err);
         }
 
-        callback(err, bidItems);
+        callback(err, newItem);
       });
     });
   }
