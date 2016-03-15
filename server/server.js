@@ -41,7 +41,7 @@ app.use(function (err, req, res, next) {
 
 //Set a global origin policy to allow cross-domain access - development mode only
 app.use('/', function(req, res, next) {
-  if (ENVIRONMENT == 'development') {
+  if (!isProduction()) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With,  Content-Type, Accept");
   }
@@ -65,7 +65,7 @@ ROUTER.route('/bids')
         } else {
 
           //Consider empty file content and return empty JSON in this case
-          if (data == undefined || data.length==0) {
+          if (data == undefined || data.length == 0) {
             data = ['[]'];
           }
 
@@ -120,6 +120,13 @@ ROUTER.route('/bids')
     //Update an existing item on the server
     .put(function (req, res) {
 
+      //We do not support PUT in production, otherwise one could alter entries
+      //of other students
+      if (isProduction()) {
+        info(res, 'PUT operation is not supported in production mode.');
+        return;
+      }
+
       //Deal with JSON encoded bodies only
       if (!isHeaderSet(req, res)) return;
 
@@ -154,6 +161,13 @@ ROUTER.route('/bids/:bid_id')
   //DELETE /b3a/api/v1/bids/:bid_id
   //Delete an existing item on the server
   .delete(function (req, res) {
+
+    //We do not support PUT in production, otherwise one could alter entries
+    //of other students
+    if (isProduction()) {
+      info(res, 'DELETE operation is not supported in production mode.');
+      return;
+    }
 
     //Callback for returning the status of the delete operation as JSON message
     let notifyClient = function (err, success) {
@@ -220,4 +234,11 @@ function validateRequest(newItem) {
   }
 
   return null;
+}
+
+/**
+* Determines if the app is running in production or not
+*/
+function isProduction() {
+  return ENVIRONMENT == 'production';
 }
