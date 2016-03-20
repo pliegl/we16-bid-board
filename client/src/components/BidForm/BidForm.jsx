@@ -8,8 +8,9 @@ class BidForm extends Component {
   }
 
   render() {
-    return (
-      <h2>Add/edit bid items</h2>
+    //TODO
+    return (<p></p>
+      // <h2>Add/edit bid items</h2>
   );
   }
 

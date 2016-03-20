@@ -56,6 +56,11 @@ class BidBoard extends Component {
                 <BidForm />
             </div>
         </div>
+        <div className="row">
+            <div className="col-md-12">
+                <p>This application is used as part of the Web Engineering lecture series at Business Informatics Group, Vienna University of Technology. For technical details in regard to the API <a href="https://github.com/pliegl/we16-bid-board/tree/master/server">please have a look at the documentation.</a></p>
+            </div>
+        </div>
       </div>
   );
   }
