@@ -30,24 +30,6 @@ app.use(express.static('static'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//Register a global error handler, to deal with invalid JSON
-//Prevents node.js internal stack traces to be reported back to the client
-app.use(function (err, req, res, next) {
-  if(err){
-   console.log(err);
-  }
-  next();
-});
-
-//Set a global origin policy to allow cross-domain access - development mode only
-app.use('/', function(req, res, next) {
-  if (!isProduction()) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With,  Content-Type, Accept");
-  }
-  next();
-});
-
 const ROUTER = express.Router();
 
 //Operations to be applied on the bids collection
@@ -88,9 +70,16 @@ ROUTER.route('/bids')
 
       //Validate, what the user has submitted
       //req.body is already JSON, thanks to body-parser
-      let newItem = req.body;
+      let validationResult = validateRequestObject(req.body);
+      if (validationResult) {
+        error(res, validationResult);
+        return;
+      }
+
+      let newItem = getRequestObject(req.body);
+
       console.log('Received a POST request with: ' + JSON.stringify(newItem, null, 4));
-      let validationResult = validateRequest(newItem);
+      validationResult = validateRequest(newItem);
       if (validationResult) {
         error(res, validationResult);
         return;
@@ -123,7 +112,7 @@ ROUTER.route('/bids')
       //We do not support PUT in production, otherwise one could alter entries
       //of other students
       if (isProduction()) {
-        info(res, 'PUT operation is not supported in production mode.');
+        error(res, 'PUT operation is not supported in production mode.');
         return;
       }
 
@@ -132,9 +121,16 @@ ROUTER.route('/bids')
 
       //Validate, what the user has submitted
       //req.body is already JSON, thanks to body-parser
-      let newItem = req.body;
+      let validationResult = validateRequestObject(req.body);
+      if (validationResult) {
+        error(res, validationResult);
+        return;
+      }
+
+      let newItem = getRequestObject(req.body);
+
       console.log('Received a PUT request with: ' + JSON.stringify(newItem, null, 4));
-      let validationResult = validateRequest(newItem);
+      validationResult = validateRequest(newItem);
       if (validationResult) {
         error(res, validationResult);
         return;
@@ -165,7 +161,7 @@ ROUTER.route('/bids/:bid_id')
     //We do not support PUT in production, otherwise one could alter entries
     //of other students
     if (isProduction()) {
-      info(res, 'DELETE operation is not supported in production mode.');
+      error(res, 'DELETE operation is not supported in production mode.');
       return;
     }
 
@@ -185,6 +181,27 @@ ROUTER.route('/bids/:bid_id')
 //Register the router
 app.use(APIPATH, ROUTER);
 
+//Register a global error handler, to deal with invalid JSON
+app.use(function (err, req, res, next) {
+  if(err){
+   console.log(err);
+   res.status(err.status || 500);
+   res.json({
+      message: err.message,
+      error, err
+   });
+  }
+});
+
+//Set a global origin policy to allow cross-domain access - development mode only
+app.use('/', function(req, res, next) {
+  if (!isProduction()) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With,  Content-Type, Accept");
+  }
+  next();
+});
+
 app.listen(PORT, function () {
   console.log('B3A app listening on port ' + PORT + ' in ' + ENVIRONMENT + ' mode. Access app under ' + APIPATH);
 });
@@ -200,14 +217,15 @@ function info(res, s) {
 
 //Write an ERROR message back, wrapped in a JSON
 function error(res, s) {
+  res.status(400);
   res.json({ message: 'ERROR: ' + s });
 }
 
 //Make sure the Content-Type HTTP header is set correctly
 function isHeaderSet(req, res) {
   if (!req.is('json')) {
-    console.error('Received a POST request with a non-JSON body.');
-    error(res, 'Please submit a POST request, where the Content-Type HTTP header is set correctly.');
+    console.error('Received a request with a non-JSON body.');
+    error(res, 'Please submit a request, where the Content-Type HTTP header is set correctly.');
     return false;
   }
 
@@ -234,6 +252,31 @@ function validateRequest(newItem) {
   }
 
   return null;
+}
+
+/**
+* The JSON request may come as object or as array. In the latter case we only
+  support single object arrays
+*/
+function validateRequestObject(obj) {
+  //Request with an array
+  if (obj instanceof Array) {
+    if (obj.length != 1) {
+      return 'You may only submit a single object per request.';
+    }
+  }
+}
+
+//Extract the object form the request
+function getRequestObject(requestObject) {
+  if (requestObject instanceof Array) {
+    console.log('Request contains an object array.');
+    return requestObject[0];
+  } else {
+    console.log('Request contains a single object.');
+    return requestObject;
+  }
+
 }
 
 /**
