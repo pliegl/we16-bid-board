@@ -4,8 +4,8 @@ B3A is used to store and view the results of auctions, which are conducted in th
 
 ##Backend
 
-The node.js server backend exposes REST interface, which students may use to push auction results to the server. [Click here for further details](server/README.md).
+The node.js server backend exposes REST interface, which students may use to push auction results to the server. [Click here for further details](server).
 
 ##Frontend
 
-The frontend allows to easily view the stored auction results. [Click here for further details](client/README.md).
+The frontend allows to easily view the stored auction results. [Click here for further details](client).
