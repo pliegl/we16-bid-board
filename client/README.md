@@ -7,7 +7,7 @@ It is designed as single page application using [react.js](https://facebook.gith
 ##Getting started with development
 
  - Initialize the repository using `npm install`
- - Start the server backend (see [backend documentation](../server/README.md))
+ - Start the server backend (see [backend documentation](../server))
  - Start the webpack development server using `npm start`
 
 ##Creating the final artifact
