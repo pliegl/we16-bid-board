@@ -30,6 +30,13 @@ app.use(express.static('static'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+//Set a global origin policy to allow cross-domain access - development mode only
+app.use('/', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With,  Content-Type, Accept");  
+  next();
+});
+
 const ROUTER = express.Router();
 
 //Operations to be applied on the bids collection
@@ -193,14 +200,6 @@ app.use(function (err, req, res, next) {
   }
 });
 
-//Set a global origin policy to allow cross-domain access - development mode only
-app.use('/', function(req, res, next) {
-  if (!isProduction()) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With,  Content-Type, Accept");
-  }
-  next();
-});
 
 app.listen(PORT, function () {
   console.log('B3A app listening on port ' + PORT + ' in ' + ENVIRONMENT + ' mode. Access app under ' + APIPATH);
