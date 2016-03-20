@@ -1,0 +1,4 @@
+//Enable some helpful babel plugins. Cf. http://babeljs.io/docs/plugins/#presets
+{
+  "presets" : ["es2015", "react", "stage-0"]
+}
