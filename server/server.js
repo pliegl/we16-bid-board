@@ -202,7 +202,7 @@ app.use(function (err, req, res, next) {
 
 
 app.listen(PORT, function () {
-  console.log('B3A app listening on port ' + PORT + ' in ' + ENVIRONMENT + ' mode. Access app under ' + APIPATH);
+  console.log('B3A app listening on port ' + PORT + ' in ' + ENVIRONMENT + ' mode. Access app under http://{host}:' + PORT + APIPATH + 'bids');
 });
 
 ////////////////
