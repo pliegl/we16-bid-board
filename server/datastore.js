@@ -20,6 +20,54 @@ class Datastore {
     this.fs.readFile(this.FILEPATH, callback);
   }
 
+  //Return a specific bid item
+  getBid(bidId, callback) {
+    let _this = this;
+    _this.fs.readFile(_this.FILEPATH, function (err, data) {
+
+      if (err) {
+        console.error('Unable to get bid items from file ' + err);
+        callback(err, null);
+        return;
+      }
+
+      //Get the items from the file
+      let bidItems;
+
+      //Consider empty files
+      if (data == undefined || data.length==0) {
+        bidItems = [];
+      }
+      else {
+        bidItems = JSON.parse(data);
+      }
+
+      //Search for the bid item based on the ID
+      //is found
+      let found = false;
+      let bidItem;
+      for (let i = 0; i < bidItems.length; i++) {
+        if (bidItems[i].id === bidId) {
+          bidItem = bidItems[i];
+          found = true;
+          console.log('Found an entry for the given bid item.');
+          break;
+        }
+      }
+
+      //In case we have found the item - return it
+      if (found) {
+        callback(null, bidItem);
+      }
+      //In case we were unable to find the respective bid item, we return an error
+      else {
+        callback('Unable to find item with id ' + bidId, null);
+      }
+    });
+
+
+  }
+
   //Write the bid to the file
   //The operation is async - as soon as the write operation is finished, the
   //callback is invoked
@@ -163,6 +211,24 @@ class Datastore {
         }
       });
     });
+  }
+
+  //Delete all bids
+  deleteBids(callback) {
+    let _this = this;
+
+    //Write an empty collection to the file
+    let emptyBidItems = [];
+
+    _this.fs.writeFile(_this.FILEPATH, JSON.stringify(emptyBidItems, null, 4), function (err) {
+      if (err) {
+        console.error('Unable to write items to file ' + err);
+        callback('Unable to access bid items', null);
+        return;
+      }
+      callback(null, 'Successfully deleted all bid items');
+    });
+
   }
 
   //Slices the bid array and limits its size to 30 entries

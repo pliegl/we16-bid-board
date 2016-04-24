@@ -33,7 +33,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //Set a global origin policy to allow cross-domain access - development mode only
 app.use('/', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With,  Content-Type, Accept");  
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With,  Content-Type, Accept");
   next();
 });
 
@@ -156,21 +156,131 @@ ROUTER.route('/bids')
 
       ds.updateBid(newItem, returnBids);
 
+    })
+
+    //DELETE /b3a/api/v1/bids
+    //Delete all bid items on the server
+    .delete(function (req, res) {
+
+      //We do not support DELETE in production, otherwise one could wipe all entries
+      if (isProduction()) {
+        error(res, 'DELETE operation is not supported in production mode.');
+        return;
+      }
+
+      //Deal with JSON encoded bodies only
+      if (!isHeaderSet(req, res)) return;
+
+      console.log('Received DELETE request - wiping all entries');
+
+      //Callback for returning the status of the delete operation as JSON message
+      let notifyClient = function (err, success) {
+        if (err) {
+          error(res, err);
+        } else if (success) {
+          info(res, success);
+        }
+      };
+
+      ds.deleteBids(notifyClient);
+
+
     });
+
 
 //Operations, specific to a certain entry
 ROUTER.route('/bids/:bid_id')
+
+  //GET /b3a/api/v1/bids/:bid_id
+  //Return a specific bid item
+  .get(function (req, res) {
+
+    console.log('Received GET request for resource ' + req.params.bid_id);
+
+    //Callback, invoked after file operation is complete
+    //We return the item in case it have been found or an error otherwise
+    let returnBid = function (err, foundItem) {
+      //Read failed
+      if (err) {
+        error(res, err);
+      } else {
+        res.setHeader('Cache-Control', 'no-cache');
+        res.json(foundItem);
+      }
+    };
+
+    ds.getBid(req.params.bid_id, returnBid);
+
+  })
+
+  //POST /b3a/api/v1/bids/:bid_id
+  //This operation is not supported, since one may only update an existing bid item
+  .post(function (req, res) {
+      error(res, 'POST is not supported on resource ' + req.params.bid_id)
+  })
+
+  //PUT /b3a/api/v1/bids/:bid_id
+  //Update the item
+  .put(function (req, res) {
+
+    //We do not support PUT in production, otherwise one could alter entries
+    //of other students
+    if (isProduction()) {
+      error(res, 'PUT operation is not supported in production mode.');
+      return;
+    }
+
+    //Deal with JSON encoded bodies only
+    if (!isHeaderSet(req, res)) return;
+
+    //Validate, what the user has submitted
+    //req.body is already JSON, thanks to body-parser
+    let validationResult = validateRequestObject(req.body);
+    if (validationResult) {
+      error(res, validationResult);
+      return;
+    }
+
+    let newItem = getRequestObject(req.body);
+
+    console.log('Received a PUT request for resource ' + req.params.bid_id + ' with: ' + JSON.stringify(newItem, null, 4));
+    validationResult = validateRequest(newItem);
+    if (validationResult) {
+      error(res, validationResult);
+      return;
+    }
+
+    //Ignore the id which has been passed in the request body and set the
+    //id from the URL instead
+    newItem.id = req.params.bid_id;
+
+    //Callback, invoked after file operation is complete
+    let returnBid = function (err, updatedItem) {
+      //Read failed
+      if (err) {
+        error(res, 'Unable to access data store on server.');
+      } else {
+        res.setHeader('Cache-Control', 'no-cache');
+        res.json(updatedItem);
+      }
+    };
+
+    ds.updateBid(newItem, returnBid);
+
+  })
 
   //DELETE /b3a/api/v1/bids/:bid_id
   //Delete an existing item on the server
   .delete(function (req, res) {
 
-    //We do not support PUT in production, otherwise one could alter entries
+    //We do not support DELETE in production, otherwise one could delete entries
     //of other students
     if (isProduction()) {
       error(res, 'DELETE operation is not supported in production mode.');
       return;
     }
+
+    console.log('Received DELETE request for resource ' + req.params.bid_id);
 
     //Callback for returning the status of the delete operation as JSON message
     let notifyClient = function (err, success) {
