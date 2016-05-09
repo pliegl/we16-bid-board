@@ -231,7 +231,7 @@ class Datastore {
 
   }
 
-  //Slices the bid array and limits its size to 30 entries
+  //Slices the bid array and limit its size to 30 entries
   slice(bids) {
     if (bids.length > 30) {
       console.log('Data store size is too large, slicing.');

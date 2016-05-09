@@ -15,6 +15,7 @@ let bodyParser = require('body-parser');
 let fs = require('fs');
 let path = require('path');
 let uuid = require('node-uuid');
+let validate = require('isvalid').validate;
 
 //Load the datastore for the bids
 const FILEPATH = path.join(__dirname, 'bids.json');
@@ -70,7 +71,8 @@ ROUTER.route('/bids')
 
     //POST /b3a/api/v1/bids
     //Create a new bid item on the server
-    .post(function (req, res) {
+    //Enforce a fine grained validation with the requestValidator() here
+    .post(requestValidator(), function (req, res) {
 
       //Content-Type must be JSON
       if (!isHeaderSet(req, res)) return;
@@ -386,6 +388,18 @@ function getRequestObject(requestObject) {
     return requestObject;
   }
 
+}
+
+//Request validator, based on the 'isvalid' library
+//TODO - hook this validator into the other operations as well
+function requestValidator() {
+  return validate.body({
+    'id': { type: String, required: true },
+    'name': { type: String, required: true },
+    'product': { type: String, required: true },
+    'price': { type: String, required: true },
+    'date': { type: String, required: true }
+  });
 }
 
 /**
