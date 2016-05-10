@@ -35,6 +35,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With,  Content-Type, Accept");
+
+  //If the request is an array, unwrap it and only take the first object
+  if (req.body instanceof Array) {
+    console.log('Request contains an object array.');
+    req.body = req.body[0];
+  }
   next();
 });
 
@@ -72,27 +78,14 @@ ROUTER.route('/bids')
     //POST /b3a/api/v1/bids
     //Create a new bid item on the server
     //Enforce a fine grained validation with the requestValidator() here
-    .post(requestValidator(), function (req, res) {
+    .post(requestValidator(false), function (req, res) {
 
       //Content-Type must be JSON
       if (!isHeaderSet(req, res)) return;
 
-      //Validate, what the user has submitted
-      //req.body is already JSON, thanks to body-parser
-      let validationResult = validateRequestObject(req.body);
-      if (validationResult) {
-        error(res, validationResult);
-        return;
-      }
-
-      let newItem = getRequestObject(req.body);
+      let newItem = req.body;
 
       console.log('Received a POST request with: ' + JSON.stringify(newItem, null, 4));
-      validationResult = validateRequest(newItem);
-      if (validationResult) {
-        error(res, validationResult);
-        return;
-      }
 
       //Reset the id to a UUID in order to have consistent IDs
       newItem.id = uuid.v4();
@@ -116,7 +109,7 @@ ROUTER.route('/bids')
 
     //PUT /b3a/api/v1/bids
     //Update an existing item on the server
-    .put(function (req, res) {
+    .put(requestValidator(true), function (req, res) {
 
       //We do not support PUT in production, otherwise one could alter entries
       //of other students
@@ -128,22 +121,9 @@ ROUTER.route('/bids')
       //Deal with JSON encoded bodies only
       if (!isHeaderSet(req, res)) return;
 
-      //Validate, what the user has submitted
-      //req.body is already JSON, thanks to body-parser
-      let validationResult = validateRequestObject(req.body);
-      if (validationResult) {
-        error(res, validationResult);
-        return;
-      }
-
-      let newItem = getRequestObject(req.body);
+      let newItem = req.body;
 
       console.log('Received a PUT request with: ' + JSON.stringify(newItem, null, 4));
-      validationResult = validateRequest(newItem);
-      if (validationResult) {
-        error(res, validationResult);
-        return;
-      }
 
       //Callback, invoked after file operation is complete
       let returnBids = function (err, updatedItem) {
@@ -223,7 +203,7 @@ ROUTER.route('/bids/:bid_id')
 
   //PUT /b3a/api/v1/bids/:bid_id
   //Update the item
-  .put(function (req, res) {
+  .put(requestValidator(false), function (req, res) {
 
     //We do not support PUT in production, otherwise one could alter entries
     //of other students
@@ -235,22 +215,9 @@ ROUTER.route('/bids/:bid_id')
     //Deal with JSON encoded bodies only
     if (!isHeaderSet(req, res)) return;
 
-    //Validate, what the user has submitted
-    //req.body is already JSON, thanks to body-parser
-    let validationResult = validateRequestObject(req.body);
-    if (validationResult) {
-      error(res, validationResult);
-      return;
-    }
-
-    let newItem = getRequestObject(req.body);
+    let newItem = req.body;
 
     console.log('Received a PUT request for resource ' + req.params.bid_id + ' with: ' + JSON.stringify(newItem, null, 4));
-    validationResult = validateRequest(newItem);
-    if (validationResult) {
-      error(res, validationResult);
-      return;
-    }
 
     //Ignore the id which has been passed in the request body and set the
     //id from the URL instead
@@ -343,63 +310,29 @@ function isHeaderSet(req, res) {
   return true;
 }
 
-//Validate the request
-function validateRequest(newItem) {
-
-  if (newItem.length > 1) {
-    return 'You may only submit one entry per request.';
-  }
-
-  if (!newItem.name) {
-    return 'You must provide a name.';
-  }
-
-  if (!newItem.product) {
-    return 'You must provide a product';
-  }
-
-  if (!newItem.price) {
-    return 'You must provide a price';
-  }
-
-  return null;
-}
-
-/**
-* The JSON request may come as object or as array. In the latter case we only
-  support single object arrays
-*/
-function validateRequestObject(obj) {
-  //Request with an array
-  if (obj instanceof Array) {
-    if (obj.length != 1) {
-      return 'You may only submit a single object per request.';
-    }
-  }
-}
-
-//Extract the object form the request
-function getRequestObject(requestObject) {
-  if (requestObject instanceof Array) {
-    console.log('Request contains an object array.');
-    return requestObject[0];
-  } else {
-    console.log('Request contains a single object.');
-    return requestObject;
-  }
-
-}
 
 //Request validator, based on the 'isvalid' library
-//TODO - hook this validator into the other operations as well
-function requestValidator() {
-  return validate.body({
-    'id': { type: String, required: true },
-    'name': { type: String, required: true },
-    'product': { type: String, required: true },
-    'price': { type: String, required: true },
-    'date': { type: String, required: true }
-  });
+function requestValidator(withId) {
+
+  if (withId) {
+    return validate.body({
+      'id': { type: String, required: true},
+      'name': { type: String, required: true },
+      'product': { type: String, required: true },
+      'price': { type: String, required: true },
+      'date': { type: String, required: true }
+    });
+  }
+  else {
+    return validate.body({
+      'id': { type: String, required: false },
+      'name': { type: String, required: true },
+      'product': { type: String, required: true },
+      'price': { type: String, required: true },
+      'date': { type: String, required: true }
+    });
+  }
+
 }
 
 /**

@@ -67,6 +67,8 @@ Make sure the HTTP header `Content-Type` is set to `application/json`. The reque
 
 ]
 ```
+The API only supports processing of single objects. In case you submit an array with more than one object, only the first object will be processed. All other objects are ignored.
+
 
 Submitting a single object is also possible:
 
