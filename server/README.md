@@ -1,4 +1,4 @@
-#B IG Bid Board Application (B3A) - Backend
+# BIG Bid Board Application (B3A) - Backend
 
 The BIG Board Application exposes a RESTful interface for auction results. The application is based on [node.js](https://nodejs.org/).
 
