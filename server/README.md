@@ -1,8 +1,8 @@
-#BIG Bid Board Application (B3A) - Backend
+#B IG Bid Board Application (B3A) - Backend
 
 The BIG Board Application exposes a RESTful interface for auction results. The application is based on [node.js](https://nodejs.org/).
 
-##Starting the backend server
+## Starting the backend server
 
 Change to the `server` directory and initialize the node application with `npm install`. This will install all necessary node packages to the `node_modules` folder.
 
@@ -21,7 +21,7 @@ For testing the service you may use command line tools such as [cURL](https://cu
 
 In the following the four different operations a briefly explained.
 
-###GET request
+### GET request
 
 Returns all stored items from the server.
 
@@ -48,7 +48,7 @@ A JSON response, similar to the following result is returned.
 ]
 ```
 
-###POST request
+### POST request
 
 Stores a new bid item on the server.
 
@@ -100,7 +100,7 @@ In this case the `id` is simply ignored and will be set by the server anyway.
 
 The response contains the submitted JSON with the new `id`, which has been set by the server.
 
-###PUT request
+### PUT request
 
 Updates an existing item or stores a new entry, if the item could not be found on the server.
 
@@ -124,7 +124,7 @@ Make sure the HTTP header `Content-Type` is set to `application/json`. In order 
 The response contains the submitted JSON.
 
 
-###DELETE request
+### DELETE request
 
 Removes an existing item from the server.
 
@@ -133,13 +133,13 @@ In order to delete the item with id `0eea3c5a-d25a-4fd9-bc2c-3d7affcad2d4`, subm
 In case the deletion was successful, an HTTP 200 with a JSON message is returned. In case the deletion failed (because the item could not be found), an HTTP 400 with a JSON message is returned.
 
 
-##Working with the server yourself
+## Working with the server yourself
 
 If you would like work with the server yourself, you may want to consider using [nodemon](http://nodemon.io).
 
 Install it using `npm install -g nodemon`. Then start the server using `nodemon server.js`. The node.js application automatically refreshes, in case you make any changes to the code.
 
-##Debugging the application
+## Debugging the application
 
 If you want to debug the node application, either use an IDE such as IntelliJ or use [Node Inspector](https://github.com/node-inspector/node-inspector).
 
@@ -160,6 +160,6 @@ Open Chrome browser (if that has not been done automatically) and open `http://1
 Use the Chrome JS debugger to set breakpoints and then invoke any of the REST operations.
 
 
-##License
+## License
 
  MIT License (MIT)
